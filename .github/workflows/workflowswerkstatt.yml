@@ -1,6 +1,8 @@
 name: Test Self-Hosted Runner
 
-on: [push]
+on:
+  push:
+    branches: [dev]
 
 jobs:
   test-runner:
@@ -9,5 +11,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Run a test command
-        run: echo "Hello from Raspberry Pi!"
+      - name: Install dependencies
+        run: dotnet restore
+        working-directory: src/sdk
+      - name: Build ⚙
+        run:  dotnet build --configuration debug --no-restore --verbosity normal 
+        working-directory: src/sdk
