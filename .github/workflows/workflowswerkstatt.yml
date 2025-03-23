@@ -110,4 +110,9 @@ jobs:
       - name: Test Integration
         run: dotnet test --logger "trx;LogFileName=test-results.trx" --results-directory TestResults --filter "PermissionRequestsTests"
         working-directory: src/sdk/PnP.Core.Admin.Test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: testresults
+          path: |
+            **/TestResults/
         
