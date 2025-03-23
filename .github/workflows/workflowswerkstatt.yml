@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Uncomment TestCommon.Instance.Mocking
         run: |
-          sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/PermissionRequestsTests.cs
+          sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/TenantAppManagerTests.cs
         working-directory: src/sdk/PnP.Core.Admin.Test
       - name: Write environment
         run: echo "loitzl2" > env.txt
