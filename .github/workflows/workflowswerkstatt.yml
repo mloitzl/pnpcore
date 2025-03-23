@@ -12,12 +12,15 @@ jobs:
         uses: actions/checkout@v3
       - name: Uncomment TestCommon.Instance.Mocking
         run: |
-          sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/TenantAppManagerTests.cs
+          sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/PermissionRequestsTests.cs
         working-directory: src/sdk/PnP.Core.Admin.Test
       - name: Write environment
         run: echo "loitzl2" > env.txt
         working-directory: src/sdk/PnP.Core.Admin.Test
       - name: Write config
+        env:
+          SP_USERNAME: ${{ secrets.SP_USERNAME }}
+          SP_PASSWORD: ${{ secrets.SP_PASSWORD }}
         run: |
           cat <<EOF > appsettings.loitzl2.json
           {
@@ -49,8 +52,9 @@ jobs:
                   "Credman": {
                       "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
                       "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
-                      "CredentialManager": {
-                          "CredentialManagerName": "PnPPS:credman"
+                      "UsernamePassword": {
+                          "Username": "$SP_USERNAME",
+                          "Password": "$SP_PASSWORD"
                       }
                   },
                   "MySetup": {
@@ -111,7 +115,7 @@ jobs:
         run: dotnet build --configuration debug --no-restore --verbosity normal 
         working-directory: src/sdk
       - name: Test Integration
-        run: dotnet test ./PnP.Core.Admin.Test.csproj --no-restore --verbosity normal --filter "TenantAppManagerTests"
+        run: dotnet test ./PnP.Core.Admin.Test.csproj --no-restore --logger "trx;LogFileName=test-results.trx" --results-directory TestResults --filter "PermissionRequestsTests"
         working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
         with:
