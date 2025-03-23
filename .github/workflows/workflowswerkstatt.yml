@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   test-runner:
-    runs-on: werkstatt
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
