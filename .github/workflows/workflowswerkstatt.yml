@@ -107,8 +107,8 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
         working-directory: src/sdk
-      - name: Install dependencies
-        run: dotnet build -c release 
+      - name: Build
+        run: dotnet build -c Release --no-incremental 
         working-directory: src/sdk
       - name: Test Integration
         run: dotnet test -c release --no-build --logger "trx;LogFileName=test-results.trx" --results-directory TestResults --filter "PermissionRequestsTests"
