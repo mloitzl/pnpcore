@@ -108,7 +108,6 @@ jobs:
         working-directory: src/sdk/PnP.Core.Admin.Test
       - name: Upload Test Results as Artifact
         uses: actions/upload-artifact@v3
-        working-directory: src/sdk/PnP.Core.Admin.Test
         with:
           name: dotnet-test-results
           path: TestResults
