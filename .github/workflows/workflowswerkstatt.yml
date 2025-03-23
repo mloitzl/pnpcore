@@ -101,6 +101,6 @@ jobs:
         run: dotnet restore
         working-directory: src/sdk
       - name: Test Integration
-        run: dotnet test --filter "PermissionRequestsTests"
+        run: dotnet test --logger "trx;LogFileName=test-results.trx" --results-directory TestResults --filter "PermissionRequestsTests"
         working-directory: src/sdk/PnP.Core.Admin.Test
         
