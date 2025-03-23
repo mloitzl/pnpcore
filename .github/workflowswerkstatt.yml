@@ -1,0 +1,13 @@
+name: Test Self-Hosted Runner
+
+on: [push]
+
+jobs:
+  test-runner:
+    runs-on: werkstatt
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run a test command
+        run: echo "Hello from Raspberry Pi!"
