@@ -111,7 +111,7 @@ jobs:
         run: dotnet build --configuration debug --no-restore --verbosity normal 
         working-directory: src/sdk
       - name: Test Integration
-        run: dotnet test ./PnP.Core.Admin.Test.csproj --no-restore --verbosity normal --filter "PermissionRequestsTests"
+        run: dotnet test ./PnP.Core.Admin.Test.csproj --no-restore --verbosity normal --filter "TenantAppManagerTests"
         working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
         with:
