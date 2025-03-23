@@ -1,4 +1,4 @@
-name: Test Self-Hosted Runner
+name: PnP Core Continuous Integration Tests
 
 on:
   push:
@@ -17,3 +17,7 @@ jobs:
       - name: Build ⚙
         run:  dotnet build --configuration debug --no-restore --verbosity normal 
         working-directory: src/sdk
+      - name: Test Integration
+        run: dotnet test --filter "PermissionRequestsTests"
+        working-directory: src/sdk/PnP.Core.Admin.Test
+        
