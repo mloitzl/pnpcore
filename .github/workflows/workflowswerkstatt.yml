@@ -46,6 +46,13 @@ jobs:
               "Credentials": {
                 "DefaultConfiguration": "MySetup",
                 "Configurations": {
+                  "Credman": {
+                      "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
+                      "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
+                      "CredentialManager": {
+                          "CredentialManagerName": "PnPPS:credman"
+                      }
+                  },
                   "MySetup": {
                     "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
                     "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
