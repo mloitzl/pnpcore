@@ -47,9 +47,9 @@ jobs:
                 "GraphAlwaysUseBeta": "false"
               },
               "Credentials": {
-                "DefaultConfiguration": "MySetup",
+                "DefaultConfiguration": "Certificate",
                 "Configurations": {
-                  "Credman": {
+                  "Usernamepassword": {
                       "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
                       "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
                       "UsernamePassword": {
@@ -57,7 +57,7 @@ jobs:
                           "Password": "$SP_PASSWORD"
                       }
                   },
-                  "MySetup": {
+                  "Certificate": {
                     "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
                     "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
                     "X509Certificate": {
@@ -70,31 +70,31 @@ jobs:
                 "Sites": {
                     "TestSite": {
                         "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktestgroup",
-                        "AuthenticationProviderName": "x509Certificate"
+                        "AuthenticationProviderName": "Certificate"
                     },
                     "TestSubSite": {
                         "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktestgroup/subsite",
-                        "AuthenticationProviderName": "x509Certificate"
+                        "AuthenticationProviderName": "Certificate"
                     },
                     "NoGroupTestSite": {
                         "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktest",
-                        "AuthenticationProviderName": "x509Certificate"
+                        "AuthenticationProviderName": "Certificate"
                     },
                     "ClassicSTS0TestSite": {
                         "SiteUrl": "https://loitzl2.sharepoint.com/sites/sts0",
-                        "AuthenticationProviderName": "x509Certificate"
+                        "AuthenticationProviderName": "Certificate"
                     },
                     "TenantAdminCenterSite": {
                         "SiteUrl": "https://loitzl2-admin.sharepoint.com",
-                        "AuthenticationProviderName": "x509Certificate"
+                        "AuthenticationProviderName": "Certificate"
                     },
                     "VivaTopicCenterTestSite": {
                         "SiteUrl": "https://loitzl2.sharepoint.com/sites/TopicCenter",
-                        "AuthenticationProviderName": "x509Certificate"
+                        "AuthenticationProviderName": "Certificate"
                     },
                     "HomeTestSite": {
                         "SiteUrl": "https://loitzl2.sharepoint.com",
-                        "AuthenticationProviderName": "x509Certificate"
+                        "AuthenticationProviderName": "Certificate"
                     }
                 }
               },
