@@ -104,6 +104,31 @@ jobs:
         run:  dotnet build --configuration debug --no-restore --verbosity normal 
         working-directory: src/sdk
       - name: Test Integration
-        run: dotnet test --filter "PermissionRequestsTests"
+        run: dotnet test --filter "PermissionRequestsTests" --logger "trx;LogFileName=test-results.trx" --results-directory TestResults
+        working-directory: src/sdk/PnP.Core.Admin.Test
+      - name: Upload Test Results as Artifact
+        uses: actions/upload-artifact@v3
+        working-directory: src/sdk/PnP.Core.Admin.Test
+        with:
+          name: dotnet-test-results
+          path: TestResults
+
+      - name: Install ReportGenerator (for HTML conversion)
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+        working-directory: src/sdk/PnP.Core.Admin.Test
+
+      - name: Generate HTML Report
+        run: reportgenerator "-reports:TestResults/*.trx" "-targetdir:TestResults/Report" "-reporttypes:HtmlInline_AzurePipelines"
+        working-directory: src/sdk/PnP.Core.Admin.Test
+
+      - name: Upload HTML Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dotnet-test-report
+          path: TestResults/Report
+      - name: Publish Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: TestResults/test-results.trx
         working-directory: src/sdk/PnP.Core.Admin.Test
         
