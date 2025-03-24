@@ -23,8 +23,8 @@ jobs:
         run: dotnet tool install -g dotnet-certificate-tool
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Run dotnet-certificate-tool
-        run: dotnet-certificate-tool --help # Replace with your actual command
+      - name: Run certificate-tool
+        run: certificate-tool --help # Replace with your actual command
         
       - name: Checkout code
         uses: actions/checkout@v3
