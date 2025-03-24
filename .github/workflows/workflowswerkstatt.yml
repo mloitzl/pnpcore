@@ -6,7 +6,7 @@ on:
 
 jobs:
   integration-tests:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Check User
         run: whoami
