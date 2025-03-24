@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Check Directory Permissions
-        run: ls -l /path/to/project
+        run: ls -l PnP.Core.Admin.Test
         working-directory: src/sdk
         
       - name: Uncomment TestCommon.Instance.Mocking
