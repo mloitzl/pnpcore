@@ -8,8 +8,18 @@ jobs:
   integration-tests:
     runs-on: self-hosted
     steps:
+      - name: Check User
+        run: whoami
+      - name: Print Environment Variables
+        run: env
+      - name: Check .NET SDK Version
+        run: dotnet --info
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Check Directory Permissions
+        run: ls -l /path/to/project
+        working-directory: src/sdk
+        
       - name: Uncomment TestCommon.Instance.Mocking
         run: |
           sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/PermissionRequestsTests.cs
@@ -109,7 +119,7 @@ jobs:
         working-directory: src/sdk/PnP.Core.Admin.Test
 
       - name: Test Integration
-        run: dotnet test ./PnP.Core.Admin.Test.csproj --filter "PermissionRequestsTests"
+        run: dotnet test ./PnP.Core.Admin.Test.csproj --logger "console;verbosity=detailed" --filter "PermissionRequestsTests"
         working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
         with:
