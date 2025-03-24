@@ -12,6 +12,11 @@ jobs:
         run: whoami
       - name: Print Environment Variables
         run: env
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '9.0.x'
+          include-prerelease: false
       - name: Check .NET SDK Version
         run: dotnet --info
       - name: Checkout code
