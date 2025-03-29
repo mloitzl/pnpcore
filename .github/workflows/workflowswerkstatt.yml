@@ -80,31 +80,31 @@ jobs:
               "Sites": {
                 "TestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktestgroup",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "TestSubSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktestgroup/subsite",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "NoGroupTestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktest",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "ClassicSTS0TestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/sts0",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "TenantAdminCenterSite": {
                   "SiteUrl": "https://loitzl2-admin.sharepoint.com",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "VivaTopicCenterTestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/TopicCenter",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "HomeTestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 }
               }
             },
@@ -119,7 +119,7 @@ jobs:
 
       - name: Test Integration
         run: |
-          dotnet test ./PnP.Core.Admin.Test.csproj --filter "PermissionRequestsTests"
+          dotnet test ./PnP.Core.Admin.Test.csproj --filter "PermissionRequestsTests" --logger trx --results-directory ./TestResults
         working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
         if: always()
