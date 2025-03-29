@@ -48,6 +48,7 @@ jobs:
           SP_USERNAME: ${{ secrets.SP_USERNAME }}
           SP_PASSWORD: ${{ secrets.SP_PASSWORD }}
         run: |
+          certificate-tool list
           cat <<EOF > appsettings.loitzl2.json
           {
             "PnPCore": {
@@ -135,7 +136,9 @@ jobs:
         working-directory: src/sdk/PnP.Core.Admin.Test
 
       - name: Test Integration
-        run: dotnet test ./PnP.Core.Admin.Test/PnP.Core.Admin.Test.csproj --logger "console;verbosity=detailed" --filter "PermissionRequestsTests"
+        run: |
+          certificate-tool list
+          dotnet test ./PnP.Core.Admin.Test/PnP.Core.Admin.Test.csproj --logger "console;verbosity=detailed" --filter "PermissionRequestsTests"
         working-directory: src/sdk
       - uses: actions/upload-artifact@v4
         with:
