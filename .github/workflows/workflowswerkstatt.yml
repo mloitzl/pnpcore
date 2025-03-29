@@ -74,7 +74,7 @@ jobs:
                 "GraphAlwaysUseBeta": "false"
               },
               "Credentials": {
-                "DefaultConfiguration": "MySetup",
+                "DefaultConfiguration": "x509Certificate",
                 "Configurations": {
                   "MySetup": {
                     "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
