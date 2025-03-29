@@ -29,26 +29,19 @@ jobs:
         run: |
           certificate-tool add -b $BASE64_CERTIFICATE
           certificate-tool list
-        
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Check Directory Permissions
-        run: ls -l PnP.Core.Admin.Test
-        working-directory: src/sdk
         
       - name: Uncomment TestCommon.Instance.Mocking
         run: |
           sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/PermissionRequestsTests.cs
-        working-directory: src/sdk/PnP.Core.Admin.Test
-      - name: Write environment
-        run: echo "loitzl2" > env.txt
         working-directory: src/sdk/PnP.Core.Admin.Test
       - name: Write config
         env:
           SP_USERNAME: ${{ secrets.SP_USERNAME }}
           SP_PASSWORD: ${{ secrets.SP_PASSWORD }}
         run: |
-          cat <<EOF > appsettings.loitzl2.json
+          cat <<EOF > appsettings.ci.json
           {
             "PnPCore": {
               "DisableTelemetry": "true",
@@ -73,36 +66,55 @@ jobs:
                 "GraphAlwaysUseBeta": "false"
               },
               "Credentials": {
-                "DefaultConfiguration": "MySetup"               
-                },
+                "DefaultConfiguration": "MySetup",
+                "Configurations": {
+                  "MySetup": {
+                    "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
+                    "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
+                    "UsernamePassword": {
+                      "Username": "$SP_USERNAME",
+                      "Password": "$SP_PASSWORD"
+                    }
+                  },
+                  "x509Certificate": {
+                    "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
+                    "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
+                    "X509Certificate": {
+                      "StoreName": "My",
+                      "StoreLocation": "CurrentUser",
+                      "ThumbPrint": "84E57F114E06A67DAA369F6DEC637CBA12ACABCC"
+                    }
+                  }
+                }
+              },
               "Sites": {
                 "TestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktestgroup",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "TestSubSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktestgroup/subsite",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "NoGroupTestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/pnpcoresdktest",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "ClassicSTS0TestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/sts0",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "TenantAdminCenterSite": {
                   "SiteUrl": "https://loitzl2-admin.sharepoint.com",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "VivaTopicCenterTestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com/sites/TopicCenter",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 },
                 "HomeTestSite": {
                   "SiteUrl": "https://loitzl2.sharepoint.com",
-                  "AuthenticationProviderName": "MySetup"
+                  "AuthenticationProviderName": "x509Certificate"
                 }
               }
             },
@@ -115,14 +127,8 @@ jobs:
           EOF
         working-directory: src/sdk/PnP.Core.Admin.Test
 
-      - name: Certs
-        run: |
-          dotnet run
-        working-directory: src/sdk/certs
-
       - name: Test Integration
         run: |
-          certificate-tool list
           dotnet test ./PnP.Core.Admin.Test.csproj --filter "PermissionRequestsTests"
         working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
@@ -131,3 +137,8 @@ jobs:
           name: testresults
           path: |
             **/TestResults/**/*        
+      - name: Run certificate-tool
+        run: |
+          certificate-tool remove -t 84E57F114E06A67DAA369F6DEC637CBA12ACABCC
+          certificate-tool list
+
