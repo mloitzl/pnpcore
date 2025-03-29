@@ -149,5 +149,4 @@ jobs:
         with:
           name: testresults
           path: |
-            **/TestResults/
-        
+            /**/TestResults/**/*        
