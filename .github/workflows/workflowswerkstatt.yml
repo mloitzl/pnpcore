@@ -8,10 +8,6 @@ jobs:
   integration-tests:
     runs-on: self-hosted
     steps:
-      - name: Certs
-        run: |
-          dotnet run
-        working-directory: src/sdk/certs
       - name: Check User
         run: whoami
       - name: Print Environment Variables
