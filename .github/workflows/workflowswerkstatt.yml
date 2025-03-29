@@ -13,7 +13,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: "9.0.x"
           include-prerelease: false
       - name: Check .NET SDK Version
         run: dotnet --info
@@ -74,11 +74,19 @@ jobs:
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup",
                   "AuthenticationProviderName": "x509Certificate"
                 },
+                "TestSite_Application": {
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup",
+                  "AuthenticationProviderName": "x509Certificate"
+                },
                 "TestSubSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup/subsite",
                   "AuthenticationProviderName": "x509Certificate"
                 },
                 "NoGroupTestSite": {
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest",
+                  "AuthenticationProviderName": "x509Certificate"
+                },
+                "NoGroupTestSite_Application": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest",
                   "AuthenticationProviderName": "x509Certificate"
                 },
@@ -119,4 +127,3 @@ jobs:
           name: testresults
           path: |
             **/TestResults/**/*
-
