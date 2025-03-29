@@ -19,16 +19,6 @@ jobs:
           include-prerelease: false
       - name: Check .NET SDK Version
         run: dotnet --info
-      - name: Install dotnet-certificate-tool (Global)
-        run: dotnet tool install -g dotnet-certificate-tool
-      - name: Add .NET tools to PATH
-        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Run certificate-tool
-        env:
-          BASE64_CERTIFICATE: ${{ secrets.BASE64_CERTIFICATE }}
-        run: |
-          certificate-tool add -b $BASE64_CERTIFICATE
-          certificate-tool list
       - name: Checkout code
         uses: actions/checkout@v3
         
@@ -136,9 +126,5 @@ jobs:
         with:
           name: testresults
           path: |
-            **/TestResults/**/*        
-      - name: Run certificate-tool
-        run: |
-          certificate-tool remove -t 84E57F114E06A67DAA369F6DEC637CBA12ACABCC
-          certificate-tool list
+            **/TestResults/**/*
 
