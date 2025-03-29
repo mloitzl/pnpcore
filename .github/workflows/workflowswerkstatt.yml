@@ -1,4 +1,4 @@
-name: PnP Core Continuous Integration Tests
+name: PnP.Core.Admin Continuous Integration Tests
 
 on:
   push:
@@ -21,6 +21,7 @@ jobs:
       - name: Uncomment TestCommon.Instance.Mocking
         run: |
           sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/PermissionRequestsTests.cs
+          sed -i 's|//TestCommon.Instance.Mocking = false;|TestCommon.Instance.Mocking = false;|' SharePoint/SiteManagerTests.cs
         working-directory: src/sdk/PnP.Core.Admin.Test
       - name: Write config
         env:
@@ -109,7 +110,7 @@ jobs:
 
       - name: Test Integration
         run: |
-          dotnet test ./PnP.Core.Admin.Test.csproj --filter "PermissionRequestsTests" --logger trx --results-directory ./TestResults
+          dotnet test ./PnP.Core.Admin.Test.csproj --filter "PermissionRequestsTests|SiteManagerTests" --logger trx --results-directory ./TestResults
         working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
         if: always()
