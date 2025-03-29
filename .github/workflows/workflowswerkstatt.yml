@@ -26,6 +26,8 @@ jobs:
         env:
           CERTIFICATE_THUMBPRINT: ${{ secrets.CERTIFICATE_THUMBPRINT }}
           TENANT_NAME: ${{ secrets.TENANT_NAME }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          TENANT_ID: ${{ secrets.TENANT_ID }}
         run: |
           cat <<EOF > appsettings.ci.json
           {
@@ -55,8 +57,8 @@ jobs:
                 "DefaultConfiguration": "x509Certificate",
                 "Configurations": {
                   "x509Certificate": {
-                    "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
-                    "TenantId": "60df2466-a102-404a-8d9d-95c950626730",
+                    "ClientId": "$CLIENT_ID",
+                    "TenantId": "$TENANT_ID",
                     "X509Certificate": {
                       "StoreName": "My",
                       "StoreLocation": "CurrentUser",
