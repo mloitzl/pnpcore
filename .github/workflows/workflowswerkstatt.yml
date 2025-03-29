@@ -48,7 +48,6 @@ jobs:
           SP_USERNAME: ${{ secrets.SP_USERNAME }}
           SP_PASSWORD: ${{ secrets.SP_PASSWORD }}
         run: |
-          certificate-tool list
           cat <<EOF > appsettings.loitzl2.json
           {
             "PnPCore": {
@@ -74,7 +73,7 @@ jobs:
                 "GraphAlwaysUseBeta": "false"
               },
               "Credentials": {
-                "DefaultConfiguration": "x509Certificate",
+                "DefaultConfiguration": "MySetup",
                 "Configurations": {
                   "MySetup": {
                     "ClientId": "321ca64c-21e3-43d6-b39c-81a225ef148f",
@@ -128,7 +127,7 @@ jobs:
             },
             "Logging": {
               "LogLevel": {
-                "Default": "Debug"
+                "Default": "Trace"
               }
             }
           }
@@ -146,6 +145,7 @@ jobs:
           dotnet test ./PnP.Core.Admin.Test.csproj --logger "console;verbosity=detailed" --filter "PermissionRequestsTests"
         working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: testresults
           path: |
