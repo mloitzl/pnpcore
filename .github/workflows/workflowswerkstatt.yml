@@ -138,8 +138,8 @@ jobs:
       - name: Test Integration
         run: |
           certificate-tool list
-          dotnet test ./PnP.Core.Admin.Test/PnP.Core.Admin.Test.csproj --logger "console;verbosity=detailed" --filter "PermissionRequestsTests"
-        working-directory: src/sdk
+          dotnet test ./PnP.Core.Admin.Test.csproj --logger "console;verbosity=detailed" --filter "PermissionRequestsTests"
+        working-directory: src/sdk/PnP.Core.Admin.Test
       - uses: actions/upload-artifact@v4
         with:
           name: testresults
