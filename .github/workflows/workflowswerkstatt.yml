@@ -30,6 +30,8 @@ jobs:
           TENANT_NAME: ${{ secrets.TENANT_NAME }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           TENANT_ID: ${{ secrets.TENANT_ID }}
+          SP_USER: ${{ secrets.SP_USER }}
+          SP_PASSWORD: ${{ secrets.SP_PASSWORD }}
         run: |
           cat <<EOF > appsettings.ci.json
           {
@@ -58,6 +60,14 @@ jobs:
               "Credentials": {
                 "DefaultConfiguration": "x509Certificate",
                 "Configurations": {
+                  "UsernamePasword": {
+                    "ClientId": "$CLIENT_ID",
+                    "TenantId": "$TENANT_ID",
+                    "UsernamePassword": {
+                        "Username": "$SP_USER",
+                        "Password": "$SP_PASSWORD"
+                    }
+                  },
                   "x509Certificate": {
                     "ClientId": "$CLIENT_ID",
                     "TenantId": "$TENANT_ID",
@@ -71,20 +81,20 @@ jobs:
               },
               "Sites": {
                 "TestSite": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup",
-                  "AuthenticationProviderName": "x509Certificate"
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup2",
+                  "AuthenticationProviderName": "UsernamePasword"
                 },
                 "TestSite_Application": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup",
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup2",
                   "AuthenticationProviderName": "x509Certificate"
                 },
                 "TestSubSite": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup/subsite",
-                  "AuthenticationProviderName": "x509Certificate"
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup2/subsite",
+                  "AuthenticationProviderName": "UsernamePasword"
                 },
                 "NoGroupTestSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest",
-                  "AuthenticationProviderName": "x509Certificate"
+                  "AuthenticationProviderName": "UsernamePasword"
                 },
                 "NoGroupTestSite_Application": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest",
@@ -92,19 +102,19 @@ jobs:
                 },
                 "ClassicSTS0TestSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/sts0",
-                  "AuthenticationProviderName": "x509Certificate"
+                  "AuthenticationProviderName": "UsernamePasword"
                 },
                 "TenantAdminCenterSite": {
                   "SiteUrl": "https://$TENANT_NAME-admin.sharepoint.com",
-                  "AuthenticationProviderName": "x509Certificate"
+                  "AuthenticationProviderName": "UsernamePasword"
                 },
                 "VivaTopicCenterTestSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/TopicCenter",
-                  "AuthenticationProviderName": "x509Certificate"
+                  "AuthenticationProviderName": "UsernamePasword"
                 },
                 "HomeTestSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com",
-                  "AuthenticationProviderName": "x509Certificate"
+                  "AuthenticationProviderName": "UsernamePasword"
                 }
               }
             },
