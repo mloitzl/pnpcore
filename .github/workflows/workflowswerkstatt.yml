@@ -60,7 +60,7 @@ jobs:
               "Credentials": {
                 "DefaultConfiguration": "x509Certificate",
                 "Configurations": {
-                  "UsernamePasword": {
+                  "UsernamePassword": {
                     "ClientId": "$CLIENT_ID",
                     "TenantId": "$TENANT_ID",
                     "UsernamePassword": {
@@ -81,40 +81,40 @@ jobs:
               },
               "Sites": {
                 "TestSite": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup2",
-                  "AuthenticationProviderName": "UsernamePasword"
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup",
+                  "AuthenticationProviderName": "UsernamePassword"
                 },
                 "TestSite_Application": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup2",
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup",
                   "AuthenticationProviderName": "x509Certificate"
                 },
                 "TestSubSite": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup2/subsite",
-                  "AuthenticationProviderName": "UsernamePasword"
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktestgroup/subsite",
+                  "AuthenticationProviderName": "UsernamePassword"
                 },
                 "NoGroupTestSite": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest",
-                  "AuthenticationProviderName": "UsernamePasword"
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest2",
+                  "AuthenticationProviderName": "UsernamePassword"
                 },
                 "NoGroupTestSite_Application": {
-                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest",
+                  "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/pnpcoresdktest2",
                   "AuthenticationProviderName": "x509Certificate"
                 },
                 "ClassicSTS0TestSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/sts0",
-                  "AuthenticationProviderName": "UsernamePasword"
+                  "AuthenticationProviderName": "UsernamePassword"
                 },
                 "TenantAdminCenterSite": {
                   "SiteUrl": "https://$TENANT_NAME-admin.sharepoint.com",
-                  "AuthenticationProviderName": "UsernamePasword"
+                  "AuthenticationProviderName": "UsernamePassword"
                 },
                 "VivaTopicCenterTestSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com/sites/TopicCenter",
-                  "AuthenticationProviderName": "UsernamePasword"
+                  "AuthenticationProviderName": "UsernamePassword"
                 },
                 "HomeTestSite": {
                   "SiteUrl": "https://$TENANT_NAME.sharepoint.com",
-                  "AuthenticationProviderName": "UsernamePasword"
+                  "AuthenticationProviderName": "UsernamePassword"
                 }
               }
             },
