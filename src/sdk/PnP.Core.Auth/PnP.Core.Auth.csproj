@@ -5,9 +5,9 @@
 		<LangVersion>10.0</LangVersion>
 		<RootNamespace>PnP.Core.Auth</RootNamespace>
 		<AssemblyName>PnP.Core.Auth</AssemblyName>
-		<Version>1.14.0</Version>
+		<Version>1.15.0</Version>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-		<Copyright>PnP 2024</Copyright>
+		<Copyright>PnP 2025</Copyright>
 		<Company>PnP</Company>
 		<Authors>PnP</Authors>
 		<Description>The PnP Core Auth library supports the PnP Core SDK providing a set of OAuth Authentication Providers internally based on the Microsoft Authentication Library.</Description>
@@ -47,7 +47,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.68.0" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.73.0" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 	</ItemGroup>
 

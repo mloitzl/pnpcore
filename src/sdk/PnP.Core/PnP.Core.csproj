@@ -5,9 +5,9 @@
 		<LangVersion>10.0</LangVersion>
 		<RootNamespace>PnP.Core</RootNamespace>
 		<AssemblyName>PnP.Core</AssemblyName>
-		<Version>1.14.0</Version>
+		<Version>1.15.0</Version>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-		<Copyright>PnP 2024</Copyright>
+		<Copyright>PnP 2025</Copyright>
 		<Company>PnP</Company>
 		<Authors>PnP</Authors>
 		<Description>The PnP Core SDK provides a development model that unites SharePoint REST and Microsoft Graph in a high performance, lightweight library. The SDK uses a model which under the covers is automatically translated to the needed SharePoint REST or Microsoft Graph queries.</Description>
@@ -44,15 +44,15 @@
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
 		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.13.1" />
-		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
-		<PackageReference Include="System.Text.Json" Version="4.7.2" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
+		<PackageReference Include="System.Text.Json" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
@@ -64,8 +64,8 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
-		<PackageReference Include="System.Text.Json" Version="8.0.5" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.5" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
@@ -77,8 +77,8 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
-		<PackageReference Include="System.Text.Json" Version="9.0.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
+		<PackageReference Include="System.Text.Json" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -87,7 +87,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />		
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 		<PackageReference Include="TimeZoneConverter" Version="6.1.0" />
 	</ItemGroup>
 

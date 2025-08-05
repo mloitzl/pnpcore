@@ -250,21 +250,57 @@ namespace PnP.Core.Model.SharePoint
         void MoveToBatch(Batch batch, string destinationUrl, MoveCopyOptions options = null);
         #endregion
 
+        #region Recycle
+        /// <summary>
+        /// Send the file to recycle bin.
+        /// </summary>
+        /// <returns>The Id of the created recycle bin item</returns>
+        Task<Guid> RecycleAsync();
+
+        /// <summary>
+        /// Send the file to recycle bin.
+        /// </summary>
+        /// <returns>The Id of the created recycle bin item</returns>
+        Guid Recycle();
+
+        /// <summary>
+        /// Send the file to recycle bin.
+        /// </summary>
+        Task<IBatchSingleResult<BatchResultValue<Guid>>> RecycleBatchAsync();
+
+        /// <summary>
+        /// Send the file to recycle bin.
+        /// </summary>
+        IBatchSingleResult<BatchResultValue<Guid>> RecycleBatch();
+
+        /// <summary>
+        /// Send the file to recycle bin.
+        /// </summary>
+        /// <param name="batch">The batch instance to use.</param>
+        Task<IBatchSingleResult<BatchResultValue<Guid>>> RecycleBatchAsync(Batch batch);
+
+        /// <summary>
+        /// Send the file to recycle bin
+        /// </summary>
+        /// <param name="batch">The batch instance to use.</param>
+        IBatchSingleResult<BatchResultValue<Guid>> RecycleBatch(Batch batch);
+        #endregion
+       
         #region EnsureFolder
         /// <summary>
-        /// Ensures a (hiarchy) of folders exists on a given folder
+        /// Ensures a (hierarchy) of folders exists on a given folder
         /// </summary>
-        /// <param name="folderRelativeUrl">a (hiarchy) of folders (e.g. folderA/folderB/FolderC) </param>
+        /// <param name="folderRelativeUrl">a (hierarchy) of folders (e.g. folderA/folderB/FolderC) </param>
         /// <param name="expressions">Expressions needed to create the request, only used when the folder exists, if the returned folder was newly created the default properties are returned</param>
-        /// <returns>The <see cref="IFolder"/> representing the final folder in the hiarchy (e.g. FolderC)</returns>
+        /// <returns>The <see cref="IFolder"/> representing the final folder in the hierarchy (e.g. FolderC)</returns>
         public Task<IFolder> EnsureFolderAsync(string folderRelativeUrl, params Expression<Func<IFolder, object>>[] expressions);
 
         /// <summary>
-        /// Ensures a (hiarchy) of folders exists on a given folder
+        /// Ensures a (hierarchy) of folders exists on a given folder
         /// </summary>
-        /// <param name="folderRelativeUrl">a (hiarchy) of folders (e.g. folderA/folderB/FolderC) </param>
+        /// <param name="folderRelativeUrl">a (hierarchy) of folders (e.g. folderA/folderB/FolderC) </param>
         /// <param name="expressions">Expressions needed to create the request, only used when the folder exists, if the returned folder was newly created the default properties are returned</param>
-        /// <returns>The <see cref="IFolder"/> representing the final folder in the hiarchy (e.g. FolderC)</returns>
+        /// <returns>The <see cref="IFolder"/> representing the final folder in the hierarchy (e.g. FolderC)</returns>
         public IFolder EnsureFolder(string folderRelativeUrl, params Expression<Func<IFolder, object>>[] expressions);
         #endregion
 

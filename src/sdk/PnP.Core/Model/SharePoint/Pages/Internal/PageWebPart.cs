@@ -1,4 +1,4 @@
-ï»¿using AngleSharp.Dom;
+using AngleSharp.Dom;
 using System;
 using System.Linq;
 using System.Net;
@@ -254,6 +254,8 @@ namespace PnP.Core.Model.SharePoint
                     SectionFactor = Column.ColumnFactor,
                     LayoutIndex = Column.LayoutIndex,
                     ControlIndex = controlIndex,
+                    ZoneId = column.ZoneId,
+                    IsLayoutReflowOnTop = Column.IsLayoutReflowOnTop
                 };
 
                 if (SpControlData != null)
@@ -269,14 +271,6 @@ namespace PnP.Core.Model.SharePoint
                     {
                         controlData.RteInstanceId = RichTextEditorInstanceId;
                         controlData.AddedFromPersistedData = true;
-                    }
-                }
-
-                if (section.Type == CanvasSectionTemplate.OneColumnVerticalSection)
-                {
-                    if (section.Columns.First().Equals(Column))
-                    {
-                        controlData.Position.SectionFactor = 12;
                     }
                 }
 
@@ -579,7 +573,13 @@ namespace PnP.Core.Model.SharePoint
                 return;
             }
 
-            var wpJObject = JsonSerializer.Deserialize<JsonElement>(decodedWebPart);
+            decodedWebPart = EscapeJsonValues(decodedWebPart);
+
+            if (!SafeDeserializeDecoded(decodedWebPart, out var wpJObject))
+            {
+                Title = "Failed to deserialize WebPart";
+                return;
+            }
 
             if (wpJObject.TryGetProperty("title", out JsonElement titleProperty))
             {
@@ -602,7 +602,10 @@ namespace PnP.Core.Model.SharePoint
             // Set property to trigger correct loading of properties 
             PropertiesJson = wpJObject.GetProperty("properties").ToString();
 
-            WebPartId = wpJObject.GetProperty("id").GetString();
+            if (wpJObject.TryGetProperty("id", out JsonElement webPartId))
+            {
+                WebPartId = webPartId.GetString();
+            }
 
             // Set/update dataVersion if it was set in the json data
             if (wpJObject.TryGetProperty("dataVersion", out JsonElement dataVersionValue))
@@ -623,7 +626,7 @@ namespace PnP.Core.Model.SharePoint
                          Page.IdToDefaultWebPart(WebPartId) == DefaultWebPart.Hero ||
                          Page.IdToDefaultWebPart(WebPartId) == DefaultWebPart.CountDown)
                 {
-                    SupportsFullBleed = true; 
+                    SupportsFullBleed = true;
                 }
             }
 
@@ -658,6 +661,101 @@ namespace PnP.Core.Model.SharePoint
             if (wpJObject.TryGetProperty("cardSize", out JsonElement ACECardSizeElement))
             {
                 ACECardSize = ACECardSizeElement.GetString();
+            }
+        }
+
+        /// <summary>
+        /// Escape JSON from the Property value
+        /// </summary>
+        /// <param name="decodedWebPart"></param>
+        /// <returns></returns>
+        private static string EscapeJsonValues(string decodedWebPart)
+        {
+            // regular expression to find a JSON string value (property with html content example: data-config-json=\"{ "k1":"v1", "k2":"{v2}", "k3": ["k4":"v4","k5":"v5"] }\" )
+            System.Text.RegularExpressions.Regex regex = new(@"\\""({"".+?})\\""", System.Text.RegularExpressions.RegexOptions.Singleline);
+            // get all matches
+            System.Text.RegularExpressions.MatchCollection matches = regex.Matches(decodedWebPart);
+            if (matches.Count > 0)
+            {
+                string jsonSnippet = string.Empty;
+                // iterate over all matches
+                foreach (System.Text.RegularExpressions.Match match in matches)
+                {
+                    jsonSnippet = match.Groups[1].Value;
+                    // Try to parse the JSON to see if it's valid
+                    try
+                    {
+                        _ = JsonDocument.Parse(jsonSnippet); // success = unescaped
+                    }
+                    catch
+                    {
+                        // Already escaped or malformed – don't re-escape
+                        continue;
+                    }
+
+                    // replace all double quotes with escaped double quotes
+                    var escapedSnipped = jsonSnippet.Replace("\"", "\\\"");
+                    // replace the original match with the escaped match
+                    decodedWebPart = decodedWebPart.Replace(jsonSnippet, escapedSnipped);
+                }
+            }
+
+            return decodedWebPart;
+        }
+
+        private static bool SafeDeserializeDecoded(string decodedWebPart, out JsonElement wpJObject)
+        {
+            while (true)
+            {
+                try
+                {
+                    wpJObject = JsonSerializer.Deserialize<JsonElement>(decodedWebPart);
+                    return true;
+                }
+                catch (JsonException ex)
+                {
+                    // Try to fix decoded double quote
+                    if ((ex.Message.Contains("is invalid after a value")
+                      || ex.Message.Contains("is an invalid start of a property name"))
+                     && ex.LineNumber == 0
+                     && ex.BytePositionInLine > 1
+                     )
+                    {
+                        var bytes = Encoding.UTF8.GetBytes(decodedWebPart);
+                        if (ex.BytePositionInLine < bytes.Length)
+                        {
+                            var replacedQuote = false;
+                            for (int pos = (int)ex.BytePositionInLine.Value - 1; pos > 0; pos--)
+                            {
+                                if (Char.IsWhiteSpace((char)bytes[pos])
+                                 || bytes[pos] == ',')
+                                    continue;
+                                if (bytes[pos] == '"')
+                                {
+                                    // Found a double quote we can try to escape
+                                    //
+                                    var builder = new StringBuilder(decodedWebPart.Length + 1);
+                                    builder.Append(Encoding.UTF8.GetString(bytes, 0, pos));
+                                    builder.Append("\\\"");
+                                    builder.Append(Encoding.UTF8.GetString(bytes, pos + 1, bytes.Length - pos - 1));
+                                    replacedQuote = true;
+                                    decodedWebPart = builder.ToString();
+                                }
+                                break;
+                            }
+                            if (replacedQuote)
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
+                    // If we reach here then we cannot fix the issue, so return false
+                    // and set the wpJObject to an empty JsonElement
+                    //
+                    wpJObject = new JsonElement();
+                    return false;
+                }
             }
         }
 

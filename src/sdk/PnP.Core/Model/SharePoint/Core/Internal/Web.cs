@@ -122,6 +122,8 @@ namespace PnP.Core.Model.SharePoint
 
         public string AccessRequestSiteDescription { get => GetValue<string>(); set => SetValue(value); }
 
+        public IAlertCollection Alerts { get => GetModelCollectionValue<IAlertCollection>(); }
+
         public bool AllowAutomaticASPXPageIndexing { get => GetValue<bool>(); set => SetValue(value); }
 
         public bool AllowCreateDeclarativeWorkflowForCurrentUser { get => GetValue<bool>(); set => SetValue(value); }
@@ -742,9 +744,9 @@ namespace PnP.Core.Model.SharePoint
                 var loginName = $"c:0-.f|rolemanager|spo-grid-all-users/{tenantId}";
                 return await EnsureUserAsync(loginName).ConfigureAwait(false);
             }
-            catch(SharePointRestServiceException ex) when (ex.HResult == -2146233088)
+            catch (SharePointRestServiceException ex) when (ex.HResult == -2146233088)
             {
-                var web = await GetAsync(p=>p.Language).ConfigureAwait(false);
+                var web = await GetAsync(p => p.Language).ConfigureAwait(false);
                 string userIdentity = null;
                 switch (web.Language)
                 {
@@ -1109,6 +1111,7 @@ namespace PnP.Core.Model.SharePoint
         public async Task<IList<string>> ValidateUsersAsync(IList<string> userList)
         {
             List<string> nonExistingUsers = new();
+            var props = "userPrincipalName,accountEnabled";
 
             if (userList == null || userList.Count == 0)
             {
@@ -1119,7 +1122,7 @@ namespace PnP.Core.Model.SharePoint
             var batch = PnPContext.NewBatch();
             foreach (var user in userList)
             {
-                requests.Add(Tuple.Create(user, await RawRequestBatchAsync(batch, new ApiCall($"users/{user}", ApiType.Graph), HttpMethod.Get, "GetUser").ConfigureAwait(false)));
+                requests.Add(Tuple.Create(user, await RawRequestBatchAsync(batch, new ApiCall($"users/{user}?$select={props}", ApiType.Graph), HttpMethod.Get, "GetUser").ConfigureAwait(false)));
             }
             await PnPContext.ExecuteAsync(batch, false).ConfigureAwait(false);
 
@@ -1128,6 +1131,18 @@ namespace PnP.Core.Model.SharePoint
                 if (request.Item2.ResponseHeaders.Count == 0)
                 {
                     nonExistingUsers.Add(request.Item1);
+                }
+                else if (request.Item2.ResponseJson != null)
+                {
+                    var user = JsonSerializer.Deserialize<JsonElement>(request.Item2.ResponseJson);
+
+                    if (user.TryGetProperty("accountEnabled", out JsonElement accountEnabled)
+                        && accountEnabled.ValueKind != JsonValueKind.Null
+                        && accountEnabled.ValueKind != JsonValueKind.Undefined
+                        && !accountEnabled.GetBoolean())
+                    {
+                        nonExistingUsers.Add(request.Item1);
+                    }
                 }
             }
 

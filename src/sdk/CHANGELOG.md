@@ -10,7 +10,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Support for reading Alerts [jansenbe - Bert Jansen]
+- Allow optional configuration of used SharePointRestClient and MicrosoftGraphClient #1659 [kola-tm]
+
+### Changed
+
+- Moved to version 9.0.0 of System.Text.Json for the .NET Standard build [jansenbe - Bert Jansen]
+- Improved page parsing robustness by allowing control index values to be not defined #1655 [singingknight - Per Jakobsen]
+- Improved page parsing robustness when wrongly decoded quotes #1658 [singingknight - Per Jakobsen]
+- Map dublin timezone correctly #1665 [tikki100 - Oliver Fast]
+- Page API: Escape JSON from the Property value #1674 [PedroMordeP - Pedro Monte]
+- Fix #1656: IList.ReIndexAsync() has no effect. #1677 [lucmoco - Luc Mo Costabella]
+- Fix: Detecting disabled users added to ValidateUsers and ValidateAndEnsureUsersAsync #1671 [kkazala - Kinga]
+
+## [1.15]
+
+### Added
+
 - Support for .NET 9.0 [jansenbe - Bert Jansen]
+- Support for recycling folders #1620 [mloitzl - Martin Loitzl]
+- Page API: added support for reflowing vertical sections to the top on smaller screens #1616 [nicolaor - Rene Nicolao]
+- Page API: added support for retaining section background settings (image) during read/save #1622 [nicolaor - Rene Nicolao]
 
 ### Changed
 
@@ -35,7 +55,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Admin library: TenantProperties: AllowWebPropertyBagUpdateWhenDenyAddAndCustomizePagesIsEnabled #1591 [czullu - Christian Zuellig]
 - Pages - act on general existence of PageTitle-WebPart #1597 [czullu - Christian Zuellig]
 - The Url for Root-Site-API Request had // in path #1598 [czullu - Christian Zuellig]
-- Bumped version of Microsoft.Identity.Client package version to 4.68.0 #1611 [gautamdsheth - Gautam Sheth]
+- Bumped version of Microsoft.Identity.Client package version to 4.70.2 #1642 [gautamdsheth - Gautam Sheth]
+- Page API: maintain full width header section in combination with vertical section #1615 #1629 [nicolaor - Rene Nicolao]
+- Additional header check for BatchClient #1635 [koenzomers - Koen Zomers]
+- Prevent blank lines when html tags have attributes #1636 [robi26 - Stephan Steiger]
+- Admin library: ACS principals created as of December 2024 are regular Entra apps, ensure the principal validity is loaded correctly [jansenbe - Bert Jansen]
+
 
 ## [1.14]
 
