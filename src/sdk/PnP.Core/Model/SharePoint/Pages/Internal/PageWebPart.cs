@@ -22,6 +22,55 @@ namespace PnP.Core.Model.SharePoint
         internal const string WebPartHtmlPropertiesAttribute = "data-sp-htmlproperties";
 
         private string propertiesJson;
+
+        public ControlFlexLayoutPosition FlexibleLayoutPosition
+        {
+            get
+            {
+                if (SpControlData == null || SpControlData.FlexibleLayoutPosition == null)
+                {
+                    return null;
+                }
+
+                return new ControlFlexLayoutPosition
+                {
+                    XPos = SpControlData.FlexibleLayoutPosition.LG.X,
+                    YPos = SpControlData.FlexibleLayoutPosition.LG.Y,
+                    Width = SpControlData.FlexibleLayoutPosition.LG.W,
+                    Height = SpControlData.FlexibleLayoutPosition.LG.H,
+                    WpGroupId = SpControlData.FlexibleLayoutPosition.GroupId
+                };
+            }
+            set
+            {
+                if (value != null)
+                {
+                    if (SpControlData == null)
+                    {
+                        SpControlData = new WebPartControlData();
+                    }
+                    SpControlData.FlexibleLayoutPosition = new CanvasControlFlexibleLayoutPosition
+                    {
+                        GroupId = value.WpGroupId,
+                        LG = new CanvasControlFlexibleLayoutPositionLG
+                        {
+                            X = value.XPos,
+                            Y = value.YPos,
+                            W = value.Width,
+                            H = value.Height
+                        }
+                    };
+                }
+                else
+                {
+                    if (SpControlData != null)
+                    {
+                        SpControlData.FlexibleLayoutPosition = null;
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region construction
@@ -232,7 +281,36 @@ namespace PnP.Core.Model.SharePoint
                         throw new ClientException(ErrorType.Unsupported, PnPCoreResources.Exception_Page_ControlNotAllowedInFullWidthSection);
                     }
                 }
+            }
 
+            BuildControlData(controlIndex);
+
+            StringBuilder html = new StringBuilder();
+            if (UsingSpControlDataOnly || IsHeaderControl)
+            {
+                html.Append($@"<div {CanvasControlAttribute}=""{CanvasControlData}"" {CanvasDataVersionAttribute}=""{CanvasDataVersion}"" {ControlDataAttribute}=""{JsonControlData.Replace("\"", "&quot;")}""></div>");
+            }
+            else
+            {
+                html.Append($@"<div {CanvasControlAttribute}=""{CanvasControlData}"" {CanvasDataVersionAttribute}=""{CanvasDataVersion}"" {ControlDataAttribute}=""{JsonControlData.Replace("\"", "&quot;")}"">");
+                html.Append($@"<div {WebPartAttribute}=""{WebPartData}"" {WebPartDataVersionAttribute}=""{DataVersion}"" {WebPartDataAttribute}=""{JsonWebPartData.Replace("\"", "&quot;").Replace("<", "&lt;").Replace(">", "&gt;")}"">");
+                html.Append($@"<div {WebPartComponentIdAttribute}=""{WebPartId}""></div>");
+                html.Append($@"<div {WebPartHtmlPropertiesAttribute}=""{HtmlProperties}"">");
+                RenderHtmlProperties(ref html);
+                html.Append("</div>");
+                html.Append("</div>");
+                html.Append("</div>");
+            }
+            return html.ToString();
+        }
+
+        /// <summary>
+        /// Builds Control attributes based on current settings, also used by pnpframework
+        /// </summary>
+        public void BuildControlData(float controlIndex)
+        {
+            if (!IsHeaderControl)
+            {
                 WebPartControlData controlData;
                 if (UsingSpControlDataOnly)
                 {
@@ -264,6 +342,7 @@ namespace PnP.Core.Model.SharePoint
                     controlData.AddedFromPersistedData = SpControlData.AddedFromPersistedData;
                     controlData.ReservedHeight = SpControlData.ReservedHeight;
                     controlData.ReservedWidth = SpControlData.ReservedWidth;
+                    controlData.FlexibleLayoutPosition = SpControlData?.FlexibleLayoutPosition;
                 }
                 else
                 {
@@ -273,7 +352,14 @@ namespace PnP.Core.Model.SharePoint
                         controlData.AddedFromPersistedData = true;
                     }
                 }
-
+                if (column.ZoneReflowStrategy.HasValue)
+                {
+                    controlData.ZoneReflowStrategy = new CanvasColumnZoneReflowStrategy { Axis = column.ZoneReflowStrategy.Value };
+                }
+                else
+                {
+                    controlData.ZoneReflowStrategy = null;
+                }
                 controlData.Emphasis = new SectionEmphasis()
                 {
                     ZoneEmphasis = Column.VerticalSectionEmphasis ?? Section.ZoneEmphasis,
@@ -287,6 +373,7 @@ namespace PnP.Core.Model.SharePoint
                         // Set section type to 1 if it was not set (when new sections are added via code)
                         Type = (Section as CanvasSection).SectionType == 0 ? 1 : (Section as CanvasSection).SectionType,
                         DisplayName = Section.DisplayName,
+                        HeadingLevel = Section.HeadingLevel,
                         IsExpanded = Section.IsExpanded,
                         ShowDividerLine = Section.ShowDividerLine,
                     };
@@ -331,6 +418,22 @@ namespace PnP.Core.Model.SharePoint
                     {
                         dataVersion = "2.2";
                     }
+                    else if (webPartType == DefaultWebPart.Hero)
+                    {
+                        dataVersion = "1.7";
+                    }
+                    else if (webPartType == DefaultWebPart.PageFields)
+                    {
+                        dataVersion = "1.1";
+                    }
+                    else if (webPartType == DefaultWebPart.MyDocuments)
+                    {
+                        dataVersion = "1.2";
+                    }
+                    else if (webPartType == DefaultWebPart.PageTitle)
+                    {
+                        dataVersion = "1.6";
+                    }
                 }
 
                 // Set the web part preview image url
@@ -350,16 +453,16 @@ namespace PnP.Core.Model.SharePoint
                 if (string.IsNullOrEmpty(ACECardSize))
                 {
                     webpartData = new WebPartData
-                    { 
-                        Id = controlData.WebPartId, 
-                        InstanceId = controlData.Id, 
-                        Title = Title, 
-                        Description = Description, 
-                        DataVersion = DataVersion, 
-                        Properties = "jsonPropsToReplacePnPRules", 
-                        DynamicDataPaths = "jsonDynamicDataPathsToReplacePnPRules", 
-                        DynamicDataValues = "jsonDynamicDataValuesToReplacePnPRules", 
-                        ServerProcessedContent = "jsonServerProcessedContentToReplacePnPRules" 
+                    {
+                        Id = controlData.WebPartId,
+                        InstanceId = controlData.Id,
+                        Title = Title,
+                        Description = Description,
+                        DataVersion = DataVersion,
+                        Properties = "jsonPropsToReplacePnPRules",
+                        DynamicDataPaths = "jsonDynamicDataPathsToReplacePnPRules",
+                        DynamicDataValues = "jsonDynamicDataValuesToReplacePnPRules",
+                        ServerProcessedContent = "jsonServerProcessedContentToReplacePnPRules"
                     };
                 }
                 else
@@ -434,26 +537,11 @@ namespace PnP.Core.Model.SharePoint
                 JsonWebPartData = JsonWebPartData.Replace("\"jsonServerProcessedContentToReplacePnPRules\"", ServerProcessedContent.ToString());
                 jsonControlData = JsonWebPartData;
             }
-
-            StringBuilder html = new StringBuilder();
-            if (UsingSpControlDataOnly || IsHeaderControl)
-            {
-                html.Append($@"<div {CanvasControlAttribute}=""{CanvasControlData}"" {CanvasDataVersionAttribute}=""{CanvasDataVersion}"" {ControlDataAttribute}=""{JsonControlData.Replace("\"", "&quot;")}""></div>");
-            }
-            else
-            {
-                html.Append($@"<div {CanvasControlAttribute}=""{CanvasControlData}"" {CanvasDataVersionAttribute}=""{CanvasDataVersion}"" {ControlDataAttribute}=""{JsonControlData.Replace("\"", "&quot;")}"">");
-                html.Append($@"<div {WebPartAttribute}=""{WebPartData}"" {WebPartDataVersionAttribute}=""{DataVersion}"" {WebPartDataAttribute}=""{JsonWebPartData.Replace("\"", "&quot;").Replace("<", "&lt;").Replace(">", "&gt;")}"">");
-                html.Append($@"<div {WebPartComponentIdAttribute}=""{WebPartId}""></div>");
-                html.Append($@"<div {WebPartHtmlPropertiesAttribute}=""{HtmlProperties}"">");
-                RenderHtmlProperties(ref html);
-                html.Append("</div>");
-                html.Append("</div>");
-                html.Append("</div>");
-            }
-            return html.ToString();
         }
 
+        #endregion
+
+        #region Internal and private methods
         /// <summary>
         /// Overrideable method that allows inheriting webparts to control the HTML rendering
         /// </summary>
@@ -504,15 +592,21 @@ namespace PnP.Core.Model.SharePoint
                         htmlWriter.Append($@"<div data-sp-prop-name=""{property.Name}"">{property.Value.GetString()}</div>");
                     }
                 }
+
+                if (ServerProcessedContent.TryGetProperty("componentDependencies", out JsonElement componentDependencies))
+                {
+                    foreach (var property in componentDependencies.EnumerateObject())
+                    {
+                        htmlWriter.Append($@"<div data-sp-prop-name=""{property.Name}"" data-sp-component-dependency=""{property.Value.GetString()}""></div>");
+                    }
+                }
             }
             else
             {
                 htmlWriter.Append(HtmlPropertiesData);
             }
         }
-        #endregion
 
-        #region Internal and private methods
         internal override void FromHtml(IElement element, bool isHeader)
         {
             base.FromHtml(element, isHeader);
@@ -671,32 +765,29 @@ namespace PnP.Core.Model.SharePoint
         /// <returns></returns>
         private static string EscapeJsonValues(string decodedWebPart)
         {
-            // regular expression to find a JSON string value (property with html content example: data-config-json=\"{ "k1":"v1", "k2":"{v2}", "k3": ["k4":"v4","k5":"v5"] }\" )
-            System.Text.RegularExpressions.Regex regex = new(@"\\""({"".+?})\\""", System.Text.RegularExpressions.RegexOptions.Singleline);
+            // regular expression to find a unescaped string value (property with html content example: data-config-json=\"{ "k1":"v1", "k2":"{v2}", "k3": ["k4":"v4","k5":"v5"] }\" )
+            System.Text.RegularExpressions.Regex regex = new(@"\\""(.*?)\\""", System.Text.RegularExpressions.RegexOptions.Singleline);
             // get all matches
             System.Text.RegularExpressions.MatchCollection matches = regex.Matches(decodedWebPart);
             if (matches.Count > 0)
             {
-                string jsonSnippet = string.Empty;
+                string stringSnippet;
+                // Create a regex to find unescaped double quotes in the string snippet
+                System.Text.RegularExpressions.Regex regexUnescaped = new(@"(?<!\\)""", System.Text.RegularExpressions.RegexOptions.Singleline);
                 // iterate over all matches
                 foreach (System.Text.RegularExpressions.Match match in matches)
                 {
-                    jsonSnippet = match.Groups[1].Value;
-                    // Try to parse the JSON to see if it's valid
-                    try
-                    {
-                        _ = JsonDocument.Parse(jsonSnippet); // success = unescaped
-                    }
-                    catch
-                    {
-                        // Already escaped or malformed – don't re-escape
-                        continue;
-                    }
+                    stringSnippet = match.Groups[1].Value;
 
-                    // replace all double quotes with escaped double quotes
-                    var escapedSnipped = jsonSnippet.Replace("\"", "\\\"");
-                    // replace the original match with the escaped match
-                    decodedWebPart = decodedWebPart.Replace(jsonSnippet, escapedSnipped);
+                    // Check for at least one unescaped double quote
+                    if (regexUnescaped.IsMatch(stringSnippet))
+                    {
+                        // replace all unescaped double quotes with escaped double quotes
+                        var escapedSnipped = regexUnescaped.Replace(stringSnippet, "\\\"");
+
+                        // replace the original match with the escaped match
+                        decodedWebPart = decodedWebPart.Replace(stringSnippet, escapedSnipped);
+                    }
                 }
             }
 
@@ -768,36 +859,18 @@ namespace PnP.Core.Model.SharePoint
 
             propertiesJson = parsedJson.ToString();
 
+            JsonElement wpConfigRoot = parsedJson;
             if (parsedJson.TryGetProperty("webPartData", out JsonElement webPartData))
             {
-                if (webPartData.TryGetProperty("properties", out JsonElement properties))
+                wpConfigRoot = webPartData;
+                if (wpConfigRoot.TryGetProperty("properties", out JsonElement properties))
                 {
                     Properties = properties;
-                }
-
-                if (webPartData.TryGetProperty("dataVersion", out JsonElement dataVersion))
-                {
-                    this.dataVersion = dataVersion.GetString().Trim('"');
-                }
-
-                if (webPartData.TryGetProperty("serverProcessedContent", out JsonElement serverProcessedContent))
-                {
-                    ServerProcessedContent = serverProcessedContent;
-                }
-
-                if (webPartData.TryGetProperty("dynamicDataPaths", out JsonElement dynamicDataPaths))
-                {
-                    DynamicDataPaths = dynamicDataPaths;
-                }
-
-                if (webPartData.TryGetProperty("dynamicDataValues", out JsonElement dynamicDataValues))
-                {
-                    DynamicDataValues = dynamicDataValues;
                 }
             }
             else
             {
-                if (parsedJson.TryGetProperty("properties", out JsonElement properties))
+                if (wpConfigRoot.TryGetProperty("properties", out JsonElement properties))
                 {
                     Properties = properties;
                 }
@@ -805,25 +878,40 @@ namespace PnP.Core.Model.SharePoint
                 {
                     Properties = parsedJson;
                 }
+            }
 
-                if (parsedJson.TryGetProperty("dataVersion", out JsonElement dataVersion))
-                {
-                    this.dataVersion = dataVersion.GetString().Trim('"');
-                }
+            if (wpConfigRoot.TryGetProperty("dataVersion", out JsonElement dataVersion))
+            {
+                this.dataVersion = dataVersion.GetString().Trim('"');
+            }
 
-                if (parsedJson.TryGetProperty("serverProcessedContent", out JsonElement serverProcessedContent))
-                {
-                    ServerProcessedContent = serverProcessedContent;
-                }
+            if (wpConfigRoot.TryGetProperty("serverProcessedContent", out JsonElement serverProcessedContent))
+            {
+                ServerProcessedContent = serverProcessedContent;
+            }
 
-                if (parsedJson.TryGetProperty("dynamicDataPaths", out JsonElement dynamicDataPaths))
-                {
-                    DynamicDataPaths = dynamicDataPaths;
-                }
+            if (wpConfigRoot.TryGetProperty("dynamicDataPaths", out JsonElement dynamicDataPaths))
+            {
+                DynamicDataPaths = dynamicDataPaths;
+            }
 
-                if (parsedJson.TryGetProperty("dynamicDataValues", out JsonElement dynamicDataValues))
+            if (wpConfigRoot.TryGetProperty("dynamicDataValues", out JsonElement dynamicDataValues))
+            {
+                DynamicDataValues = dynamicDataValues;
+            }
+
+            if (wpConfigRoot.TryGetProperty("flexibleLayoutPosition", out JsonElement flexibleLayoutPosition))
+            {
+                FlexibleLayoutPosition = new ControlFlexLayoutPosition
                 {
-                    DynamicDataValues = dynamicDataValues;
+                    XPos = flexibleLayoutPosition.GetProperty("lg").GetProperty("x").GetDouble(),
+                    YPos = flexibleLayoutPosition.GetProperty("lg").GetProperty("y").GetDouble(),
+                    Width = flexibleLayoutPosition.GetProperty("lg").GetProperty("w").GetDouble(),
+                    Height = flexibleLayoutPosition.GetProperty("lg").GetProperty("h").GetDouble()
+                };
+                if (flexibleLayoutPosition.TryGetProperty("groupId", out JsonElement groupId))
+                {
+                    FlexibleLayoutPosition.WpGroupId = Guid.TryParse(groupId.GetString(), out var wpGroupId) ? wpGroupId : null;
                 }
             }
         }

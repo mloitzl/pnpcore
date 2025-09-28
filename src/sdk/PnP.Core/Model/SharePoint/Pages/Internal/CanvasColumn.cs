@@ -14,6 +14,7 @@ namespace PnP.Core.Model.SharePoint
         internal const string ControlDataAttribute = "data-sp-controldata";
         private int? zoneEmphasis;
         private bool? isLayoutReflowOnTop;
+        private ZoneReflowStrategy? zoneReflowStrategy;
         private readonly string DataVersion = "1.0";
         #endregion
 
@@ -24,7 +25,7 @@ namespace PnP.Core.Model.SharePoint
             Section = section ?? throw new ArgumentNullException(nameof(section));
             ColumnFactor = 12;
             Order = 0;
-            LayoutIndex = 1;            
+            LayoutIndex = 1;
         }
 
         internal CanvasColumn(CanvasSection section, int order, int? sectionFactor, string zoneId = null)
@@ -139,7 +140,25 @@ namespace PnP.Core.Model.SharePoint
                 }
             }
         }
-        
+
+        /// <summary>
+        /// Gets or sets the strategy used to reflow content within a zone.
+        /// </summary>
+        public ZoneReflowStrategy? ZoneReflowStrategy
+        {
+            get
+            {
+                if (Section.Type == CanvasSectionTemplate.FlexibleLayoutSection || Section.Type == CanvasSectionTemplate.FlexibleLayoutVerticalSection)
+                    return zoneReflowStrategy;
+                else
+                    return null;
+            }
+
+            set
+            {
+                zoneReflowStrategy = value;
+            }
+        }
         #endregion
 
         #region public methods
@@ -154,36 +173,20 @@ namespace PnP.Core.Model.SharePoint
             int controlIndex = 0;
             foreach (var control in Section.Page.Controls.Where(p => p.Section == Section && p.Column == this).OrderBy(z => z.Order))
             {
-                controlIndex++;
-                html.Append((control as CanvasControl).ToHtml(controlIndex));
-                controlWrittenToSection = true;
+                if (!(control is EmptySection))
+                {
+                    controlIndex++;
+                    html.Append((control as CanvasControl).ToHtml(controlIndex));
+                    controlWrittenToSection = true;
+                }
             }
 
             // if a section does not contain a control we still need to render it, otherwise it get's "lost"
             if (!controlWrittenToSection)
             {
-                // Obtain the json data
-                var clientSideCanvasPosition = new CanvasData()
-                {
-                    Position = new CanvasPosition()
-                    {
-                        ZoneIndex = Section.Order,
-                        SectionIndex = Order,
-                        SectionFactor = ColumnFactor,
-                        LayoutIndex = LayoutIndex,
-                        ZoneId = ZoneId,
-                        IsLayoutReflowOnTop = IsLayoutReflowOnTop,
-                    },
-
-                    Emphasis = new SectionEmphasis()
-                    {
-                        ZoneEmphasis = VerticalSectionEmphasis ?? Section.ZoneEmphasis,
-                    }
-                };
-
-                var jsonControlData = JsonSerializer.Serialize(clientSideCanvasPosition);
-
-                html.Append($@"<div {CanvasControlAttribute}="""" {CanvasDataVersionAttribute}=""{DataVersion}"" {ControlDataAttribute}=""{jsonControlData.Replace("\"", "&quot;")}""></div>");
+                var emptySection = new EmptySection(Section, this);
+                controlIndex++;
+                html.Append(emptySection.ToHtml(controlIndex));
             }
 
             return html.ToString();

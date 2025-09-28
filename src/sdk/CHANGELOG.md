@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Support for reading Alerts [jansenbe - Bert Jansen]
 - Allow optional configuration of used SharePointRestClient and MicrosoftGraphClient #1659 [kola-tm]
+- Page API: support for flexible sections! #1682 [czullu - Christian Zuellig]
+- Page API: fix to retain empty, collapsible sections #1682 [czullu - Christian Zuellig]
+- Page API: fix to retain NoImage setting on custom page header #1682 [czullu - Christian Zuellig]
+- Page API: support for setting the header size of collapsible sections #1687 [shunsaker - Shayne Hunsaker]
+- Support for setting and getting the DisableCommenting property of a list #1695 [RafalUrbanski - Rafal Urbanski]
 
 ### Changed
 
@@ -22,6 +27,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Page API: Escape JSON from the Property value #1674 [PedroMordeP - Pedro Monte]
 - Fix #1656: IList.ReIndexAsync() has no effect. #1677 [lucmoco - Luc Mo Costabella]
 - Fix: Detecting disabled users added to ValidateUsers and ValidateAndEnsureUsersAsync #1671 [kkazala - Kinga]
+- Page API fix: changed flexible layout position from int to double #1688 [czullu - Christian Zuellig]
+- Page API fix: Load Page Type correctly to fix page header removal #1692 [A-Murchison - Adam Murchison]
 
 ## [1.15]
 

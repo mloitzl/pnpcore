@@ -344,7 +344,21 @@ namespace PnP.Core.Model.SharePoint
                             }
                             else
                             {
-                                Type = PageHeaderType.Default;
+                                if (LayoutType == PageHeaderLayoutType.NoImage)
+                                {
+                                    if (string.IsNullOrEmpty(pageHeaderControl.InnerHtml))
+                                    {
+                                        Type = PageHeaderType.None;
+                                    }
+                                    else
+                                    {
+                                        Type = PageHeaderType.Custom;
+                                    }
+                                }
+                                else
+                                {
+                                    Type = PageHeaderType.Default;
+                                }
                             }
                         }
                     }

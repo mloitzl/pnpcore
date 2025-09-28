@@ -45,7 +45,7 @@ namespace PnP.Core.Model.SharePoint
         private string pageName;
         private static readonly Expression<Func<IList, object>>[] getPagesLibraryExpression = new Expression<Func<IList, object>>[] {p => p.Title, p => p.TemplateType, p => p.EnableFolderCreation,
             p => p.EnableMinorVersions, p => p.EnableModeration, p => p.EnableVersioning, p => p.ForceCheckout, p => p.RootFolder.QueryProperties(p => p.Properties, p => p.ServerRelativeUrl), p => p.ListItemEntityTypeFullName, p => p.Fields };
-        
+
         #region Construction
 
         internal Page(PnPContext context, IList pagesLibrary, IListItem pageListItem, PageLayoutType pageLayoutType = PageLayoutType.Article)
@@ -525,7 +525,7 @@ namespace PnP.Core.Model.SharePoint
                 {
                     foreach (var list in libraries)
                     {
-                        if (list.IsPropertyAvailable(p => p.Fields) && 
+                        if (list.IsPropertyAvailable(p => p.Fields) &&
                             list.Fields.AsRequested().FirstOrDefault(p => p.InternalName == "CanvasContent1") != null &&
                             // Verify this is the "real" pages library, sites supporting Viva Connections have a second pages library (named Announcements) used to
                             // store Viva Connections announcements
@@ -594,6 +594,7 @@ namespace PnP.Core.Model.SharePoint
             }
             return textPart;
         }
+
         public IPageWebPart NewWebPart(IPageComponent clientSideComponent = null)
         {
             PageWebPart webPart;
@@ -639,9 +640,10 @@ namespace PnP.Core.Model.SharePoint
         /// <param name="order">Controls the order of the new section</param>
         /// <param name="zoneEmphasis">Zone emphasis (section background)</param>
         /// <param name="verticalSectionZoneEmphasis">Vertical Section Zone emphasis (section background)</param>
-        public void AddSection(CanvasSectionTemplate sectionTemplate, float order, VariantThemeType zoneEmphasis, VariantThemeType verticalSectionZoneEmphasis = VariantThemeType.None)
+        /// <param name="zoneReflowStrategy">for section with flexible layout define reflow strategy for webparts or group of webparts</param>
+        public void AddSection(CanvasSectionTemplate sectionTemplate, float order, VariantThemeType zoneEmphasis, VariantThemeType verticalSectionZoneEmphasis = VariantThemeType.None, ZoneReflowStrategy? zoneReflowStrategy = null)
         {
-            AddSection(sectionTemplate, order, (int)zoneEmphasis, (int)verticalSectionZoneEmphasis);
+            AddSection(sectionTemplate, order, (int)zoneEmphasis, (int)verticalSectionZoneEmphasis, zoneReflowStrategy);
         }
 
         /// <summary>
@@ -651,9 +653,10 @@ namespace PnP.Core.Model.SharePoint
         /// <param name="order">Controls the order of the new section</param>
         /// <param name="zoneEmphasis">Zone emphasis (section background)</param>
         /// <param name="verticalSectionZoneEmphasis">Vertical Section Zone emphasis (section background)</param>
-        public void AddSection(CanvasSectionTemplate sectionTemplate, float order, int zoneEmphasis, int? verticalSectionZoneEmphasis = null)
+        /// <param name="zoneReflowStrategy">for section with flexible layout define reflow strategy for webparts or group of webparts</param>
+        public void AddSection(CanvasSectionTemplate sectionTemplate, float order, int zoneEmphasis, int? verticalSectionZoneEmphasis = null, ZoneReflowStrategy? zoneReflowStrategy = null)
         {
-            var section = new CanvasSection(this, sectionTemplate, order)
+            var section = new CanvasSection(this, sectionTemplate, order, zoneReflowStrategy)
             {
                 ZoneEmphasis = zoneEmphasis,
             };
@@ -669,9 +672,10 @@ namespace PnP.Core.Model.SharePoint
         /// </summary>
         /// <param name="sectionTemplate">The <see cref="CanvasSectionTemplate"/> type of the section</param>
         /// <param name="order">Controls the order of the new section</param>
-        public void AddSection(CanvasSectionTemplate sectionTemplate, float order)
+        /// <param name="zoneReflowStrategy">for section with flexible layout define reflow strategy for webparts or group of webparts</param>
+        public void AddSection(CanvasSectionTemplate sectionTemplate, float order, ZoneReflowStrategy? zoneReflowStrategy = null)
         {
-            var section = new CanvasSection(this, sectionTemplate, order);
+            var section = new CanvasSection(this, sectionTemplate, order, zoneReflowStrategy);
             AddSection(section);
         }
 
@@ -727,7 +731,7 @@ namespace PnP.Core.Model.SharePoint
                 }
 
                 var fullwidthSections = Sections.Where(p => p.Type == CanvasSectionTemplate.OneColumnFullWidth);
-                if(fullwidthSections.Count() > 1)
+                if (fullwidthSections.Count() > 1)
                 {
                     throw new ClientException(ErrorType.Unsupported, PnPCoreResources.Exception_Page_VerticalColumnFullWidthSectionExists);
                 }
@@ -749,7 +753,8 @@ namespace PnP.Core.Model.SharePoint
         /// Adds a new control to your client side page using the default <see cref="ICanvasSection"/>
         /// </summary>
         /// <param name="control"><see cref="ICanvasControl"/> to add</param>
-        public void AddControl(ICanvasControl control)
+        /// <param name="controlFlexLayoutPosition">Optional <see cref="ControlFlexLayoutPosition"/> to define the position of the control in a flexible layout</param>
+        public void AddControl(ICanvasControl control, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
         {
             if (control == null)
             {
@@ -766,7 +771,8 @@ namespace PnP.Core.Model.SharePoint
                 (control as CanvasControl).column = DefaultSection.DefaultColumn;
             }
 
-            ProcessPageTextInlineControls(control);
+            ProcessPageTextInlineControls(control, controlFlexLayoutPosition);
+            ProcessPageWebPartControl(control, controlFlexLayoutPosition);
 
             Controls.Add(control);
         }
@@ -776,7 +782,8 @@ namespace PnP.Core.Model.SharePoint
         /// </summary>
         /// <param name="control"><see cref="ICanvasControl"/> to add</param>
         /// <param name="order">Order of the control in the default section</param>
-        public void AddControl(ICanvasControl control, int order)
+        /// <param name="controlFlexLayoutPosition">Optional <see cref="ControlFlexLayoutPosition"/> to define the position of the control in a flexible layout</param>
+        public void AddControl(ICanvasControl control, int order, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
         {
             if (control == null)
             {
@@ -794,7 +801,8 @@ namespace PnP.Core.Model.SharePoint
             }
             control.Order = order;
 
-            ProcessPageTextInlineControls(control);
+            ProcessPageTextInlineControls(control, controlFlexLayoutPosition);
+            ProcessPageWebPartControl(control, controlFlexLayoutPosition);
 
             Controls.Add(control);
         }
@@ -804,7 +812,8 @@ namespace PnP.Core.Model.SharePoint
         /// </summary>
         /// <param name="control"><see cref="ICanvasControl"/> to add</param>
         /// <param name="section"><see cref="ICanvasSection"/> that will hold the control. Control will end up in the <see cref="ICanvasSection.DefaultColumn"/>.</param>
-        public void AddControl(ICanvasControl control, ICanvasSection section)
+        /// <param name="controlFlexLayoutPosition">Optional <see cref="ControlFlexLayoutPosition"/> to define the position of the control in a flexible layout</param>
+        public void AddControl(ICanvasControl control, ICanvasSection section, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
         {
             if (control == null)
             {
@@ -818,7 +827,8 @@ namespace PnP.Core.Model.SharePoint
             (control as CanvasControl).section = section;
             (control as CanvasControl).column = section.DefaultColumn;
 
-            ProcessPageTextInlineControls(control);
+            ProcessPageTextInlineControls(control, controlFlexLayoutPosition);
+            ProcessPageWebPartControl(control, controlFlexLayoutPosition);
 
             Controls.Add(control);
         }
@@ -829,7 +839,8 @@ namespace PnP.Core.Model.SharePoint
         /// <param name="control"><see cref="ICanvasControl"/> to add</param>
         /// <param name="section"><see cref="ICanvasSection"/> that will hold the control. Control will end up in the <see cref="ICanvasSection.DefaultColumn"/>.</param>
         /// <param name="order">Order of the control in the given section</param>
-        public void AddControl(ICanvasControl control, ICanvasSection section, int order)
+        /// <param name="controlFlexLayoutPosition">Optional <see cref="ControlFlexLayoutPosition"/> to define the position of the control in a flexible layout</param>
+        public void AddControl(ICanvasControl control, ICanvasSection section, int order, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
         {
             if (control == null)
             {
@@ -844,7 +855,8 @@ namespace PnP.Core.Model.SharePoint
             (control as CanvasControl).column = section.DefaultColumn;
             control.Order = order;
 
-            ProcessPageTextInlineControls(control);
+            ProcessPageTextInlineControls(control, controlFlexLayoutPosition);
+            ProcessPageWebPartControl(control, controlFlexLayoutPosition);
 
             Controls.Add(control);
         }
@@ -853,8 +865,9 @@ namespace PnP.Core.Model.SharePoint
         /// Adds a new control to your client side page in the given section
         /// </summary>
         /// <param name="control"><see cref="ICanvasControl"/> to add</param>
-        /// <param name="column"><see cref="ICanvasColumn"/> that will hold the control</param>    
-        public void AddControl(ICanvasControl control, ICanvasColumn column)
+        /// <param name="column"><see cref="ICanvasColumn"/> that will hold the control</param>
+        /// <param name="controlFlexLayoutPosition">Optional <see cref="ControlFlexLayoutPosition"/> to define the position of the control in a flexible layout</param>
+        public void AddControl(ICanvasControl control, ICanvasColumn column, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
         {
             if (control == null)
             {
@@ -868,7 +881,8 @@ namespace PnP.Core.Model.SharePoint
             (control as CanvasControl).section = column.Section;
             (control as CanvasControl).column = column;
 
-            ProcessPageTextInlineControls(control);
+            ProcessPageTextInlineControls(control, controlFlexLayoutPosition);
+            ProcessPageWebPartControl(control, controlFlexLayoutPosition);
 
             Controls.Add(control);
         }
@@ -879,7 +893,8 @@ namespace PnP.Core.Model.SharePoint
         /// <param name="control"><see cref="ICanvasControl"/> to add</param>
         /// <param name="column"><see cref="ICanvasColumn"/> that will hold the control</param>    
         /// <param name="order">Order of the control in the given section</param>
-        public void AddControl(ICanvasControl control, ICanvasColumn column, int order)
+        /// <param name="controlFlexLayoutPosition">Optional <see cref="ControlFlexLayoutPosition"/> to define the position of the control in a flexible layout</param>
+        public void AddControl(ICanvasControl control, ICanvasColumn column, int order, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
         {
             if (control == null)
             {
@@ -893,6 +908,9 @@ namespace PnP.Core.Model.SharePoint
             (control as CanvasControl).section = column.Section;
             (control as CanvasControl).column = column;
             control.Order = order;
+
+            ProcessPageTextInlineControls(control, controlFlexLayoutPosition);
+            ProcessPageWebPartControl(control, controlFlexLayoutPosition);
 
             Controls.Add(control);
         }
@@ -1220,7 +1238,7 @@ namespace PnP.Core.Model.SharePoint
                         control.FromHtml(clientSideControl, false);
 
                         // Handle control positioning in sections and columns
-                        ApplySectionAndColumn(control, control.SpControlData.Position, control.SpControlData.Emphasis, control.SpControlData.ZoneGroupMetadata);
+                        ApplySectionAndColumn(control, control.SpControlData.Position, control.SpControlData.Emphasis, control.SpControlData.ZoneGroupMetadata, control.SpControlData?.ZoneReflowStrategy?.Axis);
 
                         AddControl(control);
                     }
@@ -1233,7 +1251,7 @@ namespace PnP.Core.Model.SharePoint
                         control.FromHtml(clientSideControl, false);
 
                         // Handle control positioning in sections and columns
-                        ApplySectionAndColumn(control, control.SpControlData.Position, control.SpControlData.Emphasis, control.SpControlData.ZoneGroupMetadata);
+                        ApplySectionAndColumn(control, control.SpControlData.Position, control.SpControlData.Emphasis, control.SpControlData.ZoneGroupMetadata, control.SpControlData?.ZoneReflowStrategy?.Axis);
 
                         AddControl(control);
                     }
@@ -1241,17 +1259,28 @@ namespace PnP.Core.Model.SharePoint
                     {
                         var control = new SectionBackgroundControl
                         {
-                            Order = controlOrder 
-
+                            Order = controlOrder
                         };
                         control.FromHtml(clientSideControl, false);
 
                         // Handle control positioning in sections and columns
-                        ApplySectionAndColumn(control, control.SpControlData.Position, control.SpControlData.Emphasis, control.SpControlData.ZoneGroupMetadata);
+                        ApplySectionAndColumn(control, control.SpControlData.Position, control.SpControlData.Emphasis, control.SpControlData.ZoneGroupMetadata, control.SpControlData?.ZoneReflowStrategy?.Axis);
 
                         AddControl(control);
                     }
+                    else if (controlType == typeof(EmptySection))
+                    {
+                        var control = new EmptySection
+                        {
+                            Order = controlOrder
+                        };
+                        control.FromHtml(clientSideControl, false);
 
+                        // Handle control positioning in sections and columns
+                        ApplySectionAndColumn(control, control.SpControlData.Position, control.SpControlData.Emphasis, control.SpControlData.ZoneGroupMetadata, control.SpControlData?.ZoneReflowStrategy?.Axis);
+
+                        AddControl(control);
+                    }
                     else if (controlType == typeof(CanvasColumn))
                     {
                         // Need to parse empty sections
@@ -1417,6 +1446,10 @@ namespace PnP.Core.Model.SharePoint
                         {
                             section.Type = CanvasSectionTemplate.OneColumnFullWidth;
                         }
+                        else if (section.Columns[0].ColumnFactor == 100)
+                        {
+                            section.Type = CanvasSectionTemplate.FlexibleLayoutSection;
+                        }
                         else
                         {
                             section.Type = CanvasSectionTemplate.OneColumn;
@@ -1446,7 +1479,10 @@ namespace PnP.Core.Model.SharePoint
                 {
                     if (section.Columns.Count == 2)
                     {
-                        section.Type = CanvasSectionTemplate.OneColumnVerticalSection;
+                        if (section.Columns.Any(c => c.ColumnFactor == 100))
+                            section.Type = CanvasSectionTemplate.FlexibleLayoutVerticalSection;
+                        else
+                            section.Type = CanvasSectionTemplate.OneColumnVerticalSection;
                     }
                     else if (section.Columns.Count == 3)
                     {
@@ -1535,7 +1571,7 @@ namespace PnP.Core.Model.SharePoint
             }
         }
 
-        private void ApplySectionAndColumn(CanvasControl control, CanvasControlPosition position, SectionEmphasis emphasis, SectionZoneGroupMetadata zoneGroupMetadata)
+        private void ApplySectionAndColumn(CanvasControl control, CanvasControlPosition position, SectionEmphasis emphasis, SectionZoneGroupMetadata zoneGroupMetadata, ZoneReflowStrategy? zoneReflowStrategy)
         {
             if (position == null)
             {
@@ -1573,7 +1609,7 @@ namespace PnP.Core.Model.SharePoint
                         AddSection(new CanvasSection(this) { ZoneEmphasis = emphasis != null ? emphasis.ZoneEmphasis : 0 }, position.ZoneIndex);
                         currentSection = sections.Where(p => p.Order == position.ZoneIndex).First(p => !p.Columns.Any(c => c.ColumnFactor == 0));
                     }
-                    
+
                 }
 
                 ApplyCollapsibleSectionSettings(zoneGroupMetadata, currentSection as CanvasSection);
@@ -1590,7 +1626,7 @@ namespace PnP.Core.Model.SharePoint
                 {
                     if (position.LayoutIndex.HasValue)
                     {
-                        (currentSection as CanvasSection).AddColumn(new CanvasColumn(currentSection as CanvasSection, (int)position.SectionIndex, position.SectionFactor, position.LayoutIndex.Value, position.ZoneId));
+                        (currentSection as CanvasSection).AddColumn(new CanvasColumn(currentSection as CanvasSection, (int)position.SectionIndex, position.SectionFactor, position.LayoutIndex.Value, position.ZoneId) { ZoneReflowStrategy = zoneReflowStrategy });
                         currentColumn = currentSection.Columns.Where(p => p.Order == position.SectionIndex && p.LayoutIndex == position.LayoutIndex.Value).First();
 
                         // ZoneEmphasis on a vertical section column needs to be retained as that "overrides" the zone emphasis set on the section
@@ -1619,6 +1655,7 @@ namespace PnP.Core.Model.SharePoint
                 currentSection.Collapsible = zoneGroupMetadata.Type == 1;
                 currentSection.SectionType = zoneGroupMetadata.Type;
                 currentSection.DisplayName = zoneGroupMetadata.DisplayName;
+                currentSection.HeadingLevel = zoneGroupMetadata.HeadingLevel != 0 ? zoneGroupMetadata.HeadingLevel : (int)CollapsibleSectionHeadingLevel.Heading2;
                 currentSection.IsExpanded = zoneGroupMetadata.IsExpanded;
                 currentSection.ShowDividerLine = zoneGroupMetadata.ShowDividerLine;
                 if (zoneGroupMetadata.IconAlignment != null)
@@ -1708,7 +1745,7 @@ namespace PnP.Core.Model.SharePoint
             var pageHeaderHtml = "";
             if (pageHeader != null)
             {
-                if(pageHeader.Type == PageHeaderType.Default && sections.Any(s => s.Controls.Any(c => (c as PageWebPart)?.WebPartId?.Equals("cbe7b0a9-3504-44dd-a3a3-0e5cacd07788") == true)))
+                if (pageHeader.Type == PageHeaderType.Default && sections.Any(s => s.Controls.Any(c => (c as PageWebPart)?.WebPartId?.Equals("cbe7b0a9-3504-44dd-a3a3-0e5cacd07788") == true)))
                 {
                     //Page created from code and Header was not set
                     SetPageTitleWebPartPageHeader();
@@ -2050,11 +2087,11 @@ namespace PnP.Core.Model.SharePoint
             }
 
             return await pagesLibrary.PnPContext.Web.GetFileByServerRelativeUrlOrDefaultAsync($"{pagesLibrary.RootFolder.ServerRelativeUrl}/{pageName}",
-                    p => p.ListItemAllFields.QueryProperties(p => p.All, 
+                    p => p.ListItemAllFields.QueryProperties(p => p.All,
                         p => p.ParentList.QueryProperties(
                             p => p.Fields.QueryProperties(p => p.InternalName, p => p.FieldTypeKind, p => p.TypeAsString, p => p.Title)
                         )
-                    ), 
+                    ),
                     p => p.ServerRelativeUrl, p => p.ListId).ConfigureAwait(false);
         }
 
@@ -2565,7 +2602,7 @@ namespace PnP.Core.Model.SharePoint
             }
 
             // Already load the actual likes, assuming this will be needed in most cases and thus saving the roundtrip
-            return (await PageListItem.LikedByInformation.GetAsync(p => p.LikeCount, p => p.IsLikedByUser, p => p.LikedBy).ConfigureAwait(false));            
+            return (await PageListItem.LikedByInformation.GetAsync(p => p.LikeCount, p => p.IsLikedByUser, p => p.LikedBy).ConfigureAwait(false));
         }
 
         public ILikedByInformation GetLikedByInformation()
@@ -2981,10 +3018,10 @@ namespace PnP.Core.Model.SharePoint
                                    .Replace("{WebId}", PnPContext.Web.Id.ToString())
                                    .Replace("{ListId}", image.ListId.ToString())
                                    .Replace("{UniqueId}", image.UniqueId.ToString());
-            
+
             // Create the web part
             var webPart = NewWebPart();
-            (webPart as PageWebPart).WebPartId = WebPartEnumToId(DefaultWebPart.Image);            
+            (webPart as PageWebPart).WebPartId = WebPartEnumToId(DefaultWebPart.Image);
             webPart.PropertiesJson = inlineImageWebPart;
 
             return webPart;
@@ -2995,7 +3032,7 @@ namespace PnP.Core.Model.SharePoint
             return GetImageWebPartAsync(serverRelativeUrl, imageOptions).GetAwaiter().GetResult();
         }
 
-        private void ProcessPageTextInlineControls(ICanvasControl control)
+        private void ProcessPageTextInlineControls(ICanvasControl control, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
         {
             if (control is PageText pageText)
             {
@@ -3008,9 +3045,24 @@ namespace PnP.Core.Model.SharePoint
                         Controls.Add(webPart);
                     }
                 }
+
+                if (controlFlexLayoutPosition != null)
+                {
+                    pageText.FlexibleLayoutPosition = controlFlexLayoutPosition;
+                }
             }
         }
-        
+
+        private void ProcessPageWebPartControl(ICanvasControl control, ControlFlexLayoutPosition controlFlexLayoutPosition = null)
+        {
+            if (control is PageWebPart pageWebPart)
+            {
+                // Set the flexible layout position if available
+                if (controlFlexLayoutPosition != null)
+                    pageWebPart.FlexibleLayoutPosition = controlFlexLayoutPosition;
+            }
+        }
+
         private static string EscapeJsonString(string input)
         {
             // Escape JSON string
